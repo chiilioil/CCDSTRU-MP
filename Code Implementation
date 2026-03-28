@@ -16,7 +16,104 @@ Names:
 #include <stdlib.h>
 #define SIZE 3
 
-/* ----------------------------------------------------------------------------*/
+struct Positon {
+  int a; // row
+  int b; // column
+}
+
+/* ------------ SETS -----------*/ 
+  int R[SIZE][SIZE];   // Red                              
+  int B[SIZE][SIZE];   // Blue                           
+  int S[SIZE][SIZE];   // Seen    -- visited during a spread        
+  int T[SIZE][SIZE];   // Trigger -- already chain-expanded    
+
+/* ----------- FLAGS ---------*/
+  int good;
+  int go;
+  int start;
+  int found;
+  int val;
+
+/* ---------------------------------------------------------------------------*/
+/*  1. INITIALIZATION                                                         */
+/* ---------------------------------------------------------------------------*/
+
+void initialize () {
+
+  int i, j;
+
+    for (i = 0; i < SIZE; i++) {
+        for (j = 0; j < SIZE; j++) {
+            R[i][j] = 0;
+            B[i][j] = 0;
+            S[i][j] = 0;
+            T[i][j] = 0;
+        }
+    }
+
+    good         = 0;
+    go           = 1;   /* Red moves first */
+    start        = 1;
+    found        = 0;
+    val          = 0;
+
+}
+
+/* ---------------------------------------------------------------------------*/
+/*  1. LOGIC                                                                  */
+/* ---------------------------------------------------------------------------*/
+
+int countPieces(int grid[SIZE][SIZE]) {  // count cells occupied for the first time or = 1
+    int count = 0, i, j;
+
+    for (i = 0; i < SIZE; i++)
+        for (j = 0; j < SIZE; j++)
+            if (grid[i][j]) count++;
+
+    return count;
+}
+
+int countFree() { // count free cells
+    int count = 0, i, j;
+
+    for (i = 0; i < SIZE; i++)
+        for (j = 0; j < SIZE; j++)
+            if (!R[i][j] && !B[i][j]) count++;
+
+    return count;
+}
+
+int isOver() { // checks game-ending conditions
+    int r     = countPieces(R);
+    int b     = countPieces(B);
+    int wiped = !start && ((r > 0 && b == 0) || (r == 0 && b > 0)); // other player has no more pieces
+
+    return countFree() == 3 || val >= 20 || wiped; // less than 20 moves 
+}
+
+void Remove(struct Position pos) { // Removes the pieces 
+    if (go) R[pos.a][pos.b] = 0;
+    else    B[pos.a][pos.b] = 0;
+
+    S[pos.a][pos.b] = 0;
+    T[pos.a][pos.b] = 0;
+}
+------------------ END OF UPDATE NI GENE --------------- 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -34,6 +131,38 @@ void inputMove(){
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* commented out muna 
 /* ----------------------------------------------------------------------------*/
 
 Remove(){ // parameter = pos is an element of M ??
@@ -116,5 +245,5 @@ int main(){
   return 0;
 }
 
-
+*/
 
