@@ -1,0 +1,125 @@
+--- TEST SCRIPT ---
+
+how to play screen
+2
+ENTER
+
+credits screen
+3
+ENTER
+
+check menu out of bounds
+0
+5
+abc
+
+start game
+1
+
+initial placement
+3 1
+1 2
+
+first set of expansion - tests for corner and middle expansion
+3 1
+1 2
+
+visited flag
+2 1
+2 2
+
+second expansion - tests consumption
+2 1
+
+GAME 1 END -- board nearly full
+ENTER 
+
+start game 2
+1
+
+initial placement
+3 1
+2 2
+
+first set of expansions
+3 1
+2 2
+
+GAME 2 END -- blue consumes red
+ENTER
+
+start game 3
+1
+
+initial placement
+2 2
+2 1
+
+first set of expansions
+2 2
+
+GAME 3 END -- red consumes blue
+ENTER
+
+game start
+1
+
+tests for draw game --
+
+game start
+1
+
+1 1
+3 3
+
+1 1
+3 3
+
+1 2
+3 2
+
+1 2
+3 2
+
+1 1
+3 3
+
+1 1
+3 3
+
+1 2
+3 2
+
+1 2
+3 2
+
+1 1
+3 3
+
+1 1
+3 3
+
+GAME END 3 -- MAX MOVE COUNT, DRAW
+ENTER
+
+game start
+1
+
+placement phase
+1 1
+4 4 -- out of bounds
+1 1 -- occupied by opponent
+abc -- invalid
+2 2 -- valid placement
+
+expansion phase
+3 3 -- expands empty tile
+2 2 -- expands opponent's tile
+4 4 -- out of bounds at expansion
+abc -- invalid
+1 1 -- valid expansion
+2 2 -- valid expansion
+
+0 0 -- kill switch back to menu
+
+4 -- exit game
