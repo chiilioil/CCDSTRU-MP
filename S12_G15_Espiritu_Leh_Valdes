@@ -564,6 +564,7 @@ void playGame(void) {
                     }
                     else {
                         printf("\n  Invalid move. Cell is already occupied.\n\n");
+						system("pause");
                     }
                 }
                 else {
@@ -575,11 +576,13 @@ void playGame(void) {
                     }
                     else {
                         printf("\n  Invalid move. Choose one of your own pieces.\n\n");
+						system("pause");
                     }
                 }
             }
             else {
                 printf("\n  Invalid move. Row and column must be from 1 to 3 only.\n\n");
+				system("pause");
             }
 
             if (validMove) {
@@ -589,6 +592,7 @@ void playGame(void) {
         else {
             clearLine();
             printf("\n  Invalid input. Enter two integers only.\n\n");
+			system("pause");
         }
     }
 
@@ -626,11 +630,13 @@ int main(void) {
                     break;
                 default:
                     printf("  Invalid choice. Enter 1 to 4.\n\n");
+					system("pause");
             }
         }
         else {
             clearLine();
             printf("  Invalid input. Enter 1 to 4.\n\n");
+			system("pause");
         }
     }
 
