@@ -129,7 +129,43 @@ void expand(Position pos) {
 }
 
 void replace (Position pos) {
-  - palagay here -
+	found = 0;
+	
+	if (go && B[pos.a][pos.b]){		// red captures blue
+		B[pos.a][pos.b] = 0;
+		found = 1;
+	}
+
+	if (go && R[pos.a][pos.b])		// red spreads into itself
+		found = 1;
+
+	if (go && !R[pos.a][pos.b])		// red claims empty space
+		R[pos.a][pos.b] = 1;
+
+	
+
+	if (!go && R[pos.a][pos.b]){		// blue captures red
+		R[pos.a][pos.b] = 0;
+		found = 1;
+	}
+
+	if (!go && B[pos.a][pos.b])		// blue captures itself
+		found = 1;
+
+	if (!go && !B[pos.a][pos.b])		// blue claims empty space
+		B[pos.a][pos.b] = 1;
+
+
+
+	if (found && !S[pos.a][pos.b]){
+		S[pos.a][pos.b] = 1;
+		found = 0;
+	}
+
+	if (found && S[pos.a][pos.b] && !T[pos.a][pos.b]){
+		T[pos.a][pos.b] = 1;
+		expand(pos);
+	}
 }
 
 void Update(Position pos) {
