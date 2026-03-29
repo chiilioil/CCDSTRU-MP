@@ -1,0 +1,606 @@
+/*
+CCDSTRU MP
+
+Section: S12
+Group:   15
+
+Names:
+  Gene Clement Espiritu
+  Elysha Audrey Leh
+  Jeno Angelo Valdes
+
+  add github link here?
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define SIZE 3
+
+#define RESET       "\033[0m"
+#define BOLD        "\033[1m"
+#define DIM         "\033[2m"
+
+#define RED_COL     "\033[31m"
+#define BLUE_COL    "\033[34m"
+#define YELLOW      "\033[33m"
+#define CYAN        "\033[36m"
+#define GREEN       "\033[32m"
+
+typedef struct Position {
+    int x; /* row */
+    int y; /* column */
+} Position;
+
+typedef struct {
+    int R[SIZE][SIZE];
+    int B[SIZE][SIZE];
+    int S[SIZE][SIZE];
+    int T[SIZE][SIZE];
+    int good;
+    int go;
+    int start;
+    int found;
+    int val;
+} GameState;
+
+/* -------------- function prototypes ----------------*/
+
+void clearLine(void);
+void initialize(GameState *game);
+
+int countPieces(int grid[SIZE][SIZE]);
+int countFree(GameState *game);
+int isInside(Position pos);
+int isOver(GameState *game);
+
+void Remove(GameState *game, Position pos);
+void Replace(GameState *game, Position pos);
+void Expand(GameState *game, Position pos);
+void Update(GameState *game, Position pos);
+void NextPlayerMove(GameState *game, Position pos);
+
+void printTitle(void);
+void printMainMenu(void);
+void printHowToPlay(void);
+void printCredits(void);
+void printGameBoard(GameState *game);
+void GameOver(GameState *game);
+
+void playGame(void);
+
+/* ---------------------------------------------------------------------------*/
+/*  1. INITIALIZATION                                                         */
+/* ---------------------------------------------------------------------------*/
+
+void initialize(GameState *game) {
+    int i, j;
+
+    for (i = 0; i < SIZE; i++) {
+        for (j = 0; j < SIZE; j++) {
+            game->R[i][j] = 0;
+            game->B[i][j] = 0;
+            game->S[i][j] = 0;
+            game->T[i][j] = 0;
+        }
+    }
+
+    game->good = 0;
+    game->go = 1;
+    game->start = 1;
+    game->found = 0;
+    game->val = 0;
+}
+
+/* ---------------------------------------------------------------------------*/
+/*  2. LOGIC                                                                  */
+/* ---------------------------------------------------------------------------*/
+
+void clearLine(void) {
+    int ch;
+
+    ch = getchar();
+    while (ch != '\n' && ch != EOF) {
+        ch = getchar();
+    }
+}
+
+int isInside(Position pos) {
+    int inside;
+
+    inside = 0;
+
+    if (pos.x >= 0 && pos.x < SIZE && pos.y >= 0 && pos.y < SIZE) {
+        inside = 1;
+    }
+
+    return inside;
+}
+
+int countPieces(int grid[SIZE][SIZE]) {
+    int count, i, j;
+
+    count = 0;
+
+    for (i = 0; i < SIZE; i++) {
+        for (j = 0; j < SIZE; j++) {
+            if (grid[i][j]) {
+                count++;
+            }
+        }
+    }
+
+    return count;
+}
+
+int countFree(GameState *game) {
+    int count, i, j;
+
+    count = 0;
+
+    for (i = 0; i < SIZE; i++) {
+        for (j = 0; j < SIZE; j++) {
+            if (!game->R[i][j] && !game->B[i][j]) {
+                count++;
+            }
+        }
+    }
+
+    return count;
+}
+
+int isOver(GameState *game) {
+    int r, b, wiped, over;
+
+    r = countPieces(game->R);
+    b = countPieces(game->B);
+
+    wiped = 0;
+    if (!game->start && ((r > 0 && b == 0) || (r == 0 && b > 0))) {
+        wiped = 1;
+    }
+
+    over = 0;
+    if (countFree(game) == 3 || game->val >= 20 || wiped) {
+        over = 1;
+    }
+
+    return over;
+}
+
+void Remove(GameState *game, Position pos) {
+    if (game->go) {
+        game->R[pos.x][pos.y] = 0;
+    }
+    else {
+        game->B[pos.x][pos.y] = 0;
+    }
+
+    game->S[pos.x][pos.y] = 0;
+    game->T[pos.x][pos.y] = 0;
+}
+
+void Expand(GameState *game, Position pos) {
+    int a, b;
+    Position u, d, k, r;
+
+    a = pos.x;
+    b = pos.y;
+
+    u.x = a - 1;
+    u.y = b;
+
+    d.x = a + 1;
+    d.y = b;
+
+    k.x = a;
+    k.y = b - 1;
+
+    r.x = a;
+    r.y = b + 1;
+
+    Remove(game, pos);
+
+    if (game->go) {
+        Replace(game, u);
+    }
+    else {
+        Replace(game, d);
+    }
+
+    Replace(game, k);
+    Replace(game, r);
+}
+
+void Replace(GameState *game, Position pos) {
+    if (isInside(pos)) {
+        game->found = 0;
+
+        if (game->go && game->B[pos.x][pos.y]) {
+            game->B[pos.x][pos.y] = 0;
+            game->found = 1;
+        }
+
+        if (game->go && game->R[pos.x][pos.y]) {
+            game->found = 1;
+        }
+
+        if (game->go && !game->R[pos.x][pos.y]) {
+            game->R[pos.x][pos.y] = 1;
+        }
+
+        if (!game->go && game->R[pos.x][pos.y]) {
+            game->R[pos.x][pos.y] = 0;
+            game->found = 1;
+        }
+
+        if (!game->go && game->B[pos.x][pos.y]) {
+            game->found = 1;
+        }
+
+        if (!game->go && !game->B[pos.x][pos.y]) {
+            game->B[pos.x][pos.y] = 1;
+        }
+
+        if (game->found && !game->S[pos.x][pos.y]) {
+            game->S[pos.x][pos.y] = 1;
+            game->found = 0;
+        }
+
+        if (game->found && game->S[pos.x][pos.y] && !game->T[pos.x][pos.y]) {
+            game->T[pos.x][pos.y] = 1;
+            Expand(game, pos);
+        }
+    }
+}
+
+void Update(GameState *game, Position pos) {
+    game->good = 0;
+
+    if (!game->S[pos.x][pos.y]) {
+        game->S[pos.x][pos.y] = 1;
+        game->good = !game->good;
+    }
+
+    if (!game->good && game->S[pos.x][pos.y] && !game->T[pos.x][pos.y]) {
+        game->T[pos.x][pos.y] = 1;
+        Expand(game, pos);
+    }
+}
+
+void NextPlayerMove(GameState *game, Position pos) {
+    if (!isOver(game) && game->start) {
+        if (game->go) {
+            game->R[pos.x][pos.y] = 1;
+        }
+        else {
+            game->B[pos.x][pos.y] = 1;
+        }
+
+        game->S[pos.x][pos.y] = 1;
+        game->good = 1;
+    }
+
+    if (!isOver(game) && !game->start) {
+        if ((game->go && game->R[pos.x][pos.y]) ||
+            (!game->go && game->B[pos.x][pos.y])) {
+            Update(game, pos);
+            game->good = 1;
+        }
+    }
+
+    if (game->start &&
+        countPieces(game->R) == 1 &&
+        countPieces(game->B) == 1) {
+        game->start = 0;
+    }
+
+    if (!isOver(game) && game->good) {
+        game->good = 0;
+        game->go = !game->go;
+        game->val++;
+    }
+}
+
+void GameOver(GameState *game) {
+    int r, b;
+
+    r = countPieces(game->R);
+    b = countPieces(game->B);
+
+    printf("\n");
+    printf(DIM "  -------------------------------------------\n" RESET);
+
+    if (r > b) {
+        printf(RED_COL BOLD "      RED WINS!" RESET
+               "   Red: %d piece(s)  Blue: %d piece(s)\n", r, b);
+    }
+    else if (b > r) {
+        printf(BLUE_COL BOLD "      BLUE WINS!" RESET
+               "   Blue: %d piece(s)  Red: %d piece(s)\n", b, r);
+    }
+    else {
+        printf(YELLOW BOLD "         DRAW!" RESET
+               "   Both players have %d piece(s)\n", r);
+    }
+
+    printf(DIM "  -------------------------------------------\n" RESET);
+    printf("\n");
+
+    if (countFree(game) == 3) {
+        printf("  -> Board is nearly full (only 3 empty cells left).\n");
+    }
+    else if (game->val >= 20) {
+        printf("  -> 20 moves have been played.\n");
+    }
+    else if (b == 0) {
+        printf("  -> " BLUE_COL "Blue" RESET " lost all their pieces!\n");
+    }
+    else if (r == 0) {
+        printf("  -> " RED_COL "Red" RESET " lost all their pieces!\n");
+    }
+
+    printf("\n");
+}
+
+/* ---------------------------------------------------------------------------*/
+/*  3. Display                                                                */
+/* ---------------------------------------------------------------------------*/
+
+void printTitle(void){
+    printf("  ==========================================\n");
+    printf(BOLD "        CHAIN REACTION   --   " RESET
+           RED_COL BOLD "Red" RESET " vs " BLUE_COL BOLD "Blue" RESET "\n");
+    printf(DIM "       CCDSTRU MP  |  AY 2025-2026  |  S12 \n" RESET);
+    printf(YELLOW "  ==========================================\n" RESET);
+}
+
+void printMainMenu(void) {
+	system("cls");
+    printTitle();
+    printf("\n");
+    printf(CYAN "  [1]" RESET " Start Game\n");
+    printf(CYAN "  [2]" RESET " How to Play\n");
+    printf(CYAN "  [3]" RESET " Credits\n");
+    printf(CYAN "  [4]" RESET " Exit\n");
+    printf("\n");
+    printf("  Enter choice: ");
+}
+
+void printHowToPlay(void) {
+	system("cls");
+    printTitle();
+    printf("\n");
+    printf(BOLD "  HOW TO PLAY\n" RESET);
+    printf(DIM "  -----------\n" RESET);
+    printf("  2-player strategy game on a 3x3 grid.\n");
+    printf("  The player with the most pieces when the game ends " BOLD "WINS.\n" RESET);
+    printf("\n");
+    printf(YELLOW "  PHASE 1 - Placement\n" RESET);
+    printf("    Each player places ONE piece on any empty cell.\n");
+    printf("    " RED_COL "Red" RESET " places first, then " BLUE_COL "Blue" RESET ".\n");
+    printf("\n");
+    printf(YELLOW "  PHASE 2 - Movement\n" RESET);
+    printf("    On your turn, pick one of YOUR OWN pieces to Expand.\n");
+    printf("    The piece disappears and spreads into neighboring cells:\n");
+    printf("      " RED_COL "Red" RESET "  spreads:  UP, LEFT, RIGHT\n");
+    printf("      " BLUE_COL "Blue" RESET " spreads:  DOWN, LEFT, RIGHT\n");
+    printf("\n");
+    printf("    What happens when spreading into a cell:\n");
+    printf("      Empty cell      ->  you claim it\n");
+    printf("      Enemy piece     ->  you capture it (it disappears)\n");
+    printf("      Your own piece  ->  may trigger a " YELLOW BOLD "CHAIN REACTION!\n" RESET);
+    printf("\n");
+    printf(YELLOW "  GAME ENDS when any of these happen:\n" RESET);
+    printf("    - Only 3 cells are empty\n");
+    printf("    - One player loses all their pieces\n");
+    printf("    - 20 moves have been played\n");
+    printf("\n");
+    printf(YELLOW "  ENTERING A MOVE:\n" RESET);
+    printf("    Type the ROW number and COLUMN number separated by a space.\n");
+    printf("    Example:  " CYAN "2 3" RESET "   =  row 2, column 3\n");
+	printf("    Note: Enter 0 0 to return to the main menu\n");
+    printf("\n");
+    printf(DIM "  ------------------------------------------\n" RESET);
+	system("pause");
+}
+
+void printCredits(void) {
+	system("cls");
+    printTitle();
+    printf("\n");
+    printf(BOLD "  CREDITS\n" RESET);
+    printf(DIM "  -------\n" RESET);
+    printf(CYAN "  Gene Clement Espiritu\n" RESET);
+    printf(CYAN "  Elysha Audrey Leh\n" RESET);
+    printf(CYAN "  Jeno Angelo Valdes\n" RESET);
+    printf("\n");
+    printf("  Group    :  15\n");
+	printf("  Section  :  S12\n");
+    printf("  Course   :  CCDSTRU\n");
+    printf("  Term     :  Term 2, AY 2025-2026\n");
+    printf("\n");
+    printf("  ------------------------------------------\n");
+	system("pause");
+}
+
+void printGameBoard(GameState *game) {
+	int i, j;
+	system("cls");
+	
+    printTitle();
+    printf("\n");
+
+    printf("  Turn       : ");
+    if (game->go) {
+        printf(RED_COL "Red\n" RESET);
+    }
+    else {
+        printf(BLUE_COL "Blue\n" RESET);
+    }
+
+    printf("  Phase      : ");
+    if (game->start) {
+        printf("Placement\n");
+    }
+    else {
+        printf("Expansion\n");
+    }
+
+    printf("  Move Count : %d / 20\n", game->val);
+    printf("  Red Pieces : %d\n", countPieces(game->R));
+    printf("  Blue Pieces: %d\n", countPieces(game->B));
+    printf("\n");
+
+    printf("        1   2   3\n");
+    printf("      +---+---+---+\n");
+
+    for (i = 0; i < SIZE; i++) {
+        printf("    %d |", i + 1);
+
+        for (j = 0; j < SIZE; j++) {
+            if (game->R[i][j]) {
+                printf(" " RED_COL "R" RESET " |");
+            }
+            else if (game->B[i][j]) {
+                printf(" " BLUE_COL "B" RESET " |");
+            }
+            else {
+                printf("   |");
+            }
+        }
+
+        printf("\n");
+        printf("      +---+---+---+\n");
+    }
+
+    printf("\n");
+}
+
+void playGame(void) {
+    GameState game;
+    Position pos;
+    int success;
+    int validMove;
+    int row, col;
+
+    initialize(&game);
+
+    while (!isOver(&game)) {
+        printGameBoard(&game);
+
+        if (game.start) {
+            if (game.go) {
+                printf(RED_COL "  Red" RESET " - enter an empty cell (row col): ");
+            }
+            else {
+                printf(BLUE_COL "  Blue" RESET " - enter an empty cell (row col): ");
+            }
+        }
+        else {
+            if (game.go) {
+                printf(RED_COL "  Red" RESET " - choose one of your pieces to Expand (row col): ");
+            }
+            else {
+                printf(BLUE_COL "  Blue" RESET " - choose one of your pieces to Expand (row col): ");
+            }
+        }
+
+        success = scanf("%d %d", &row, &col);
+
+        if (success == 2) {
+            clearLine();
+
+			if (row == 0 && col == 0){		// kill switch for playtesting purposes
+				printf("\n  Returning to main menu...\n\n");
+				system("pause");
+				return;
+			}
+				
+            row--;
+            col--;
+
+            pos.x = row;
+            pos.y = col;
+
+            validMove = 0;
+
+            if (isInside(pos)) {
+                if (game.start) {
+                    if (!game.R[row][col] && !game.B[row][col]) {
+                        validMove = 1;
+                    }
+                    else {
+                        printf("\n  Invalid move. Cell is already occupied.\n\n");
+                    }
+                }
+                else {
+                    if (game.go && game.R[row][col]) {
+                        validMove = 1;
+                    }
+                    else if (!game.go && game.B[row][col]) {
+                        validMove = 1;
+                    }
+                    else {
+                        printf("\n  Invalid move. Choose one of your own pieces.\n\n");
+                    }
+                }
+            }
+            else {
+                printf("\n  Invalid move. Row and column must be from 1 to 3 only.\n\n");
+            }
+
+            if (validMove) {
+                NextPlayerMove(&game, pos);
+            }
+        }
+        else {
+            clearLine();
+            printf("\n  Invalid input. Enter two integers only.\n\n");
+        }
+    }
+
+    printGameBoard(&game);
+    GameOver(&game);
+	system("pause");
+}
+
+int main(void) {
+    int nChoice;
+    int success;
+
+    nChoice = 0;
+
+    while (nChoice != 4) {
+        printMainMenu();
+
+        success = scanf("%d", &nChoice);
+
+        if (success == 1) {
+            clearLine();
+
+            switch (nChoice) {
+                case 1:
+                    playGame();
+                    break;
+                case 2:
+                    printHowToPlay();
+                    break;
+                case 3:
+                    printCredits();
+                    break;
+                case 4:
+                    printf("  Thanks for playing!\n\n");
+                    break;
+                default:
+                    printf("  Invalid choice. Enter 1 to 4.\n\n");
+            }
+        }
+        else {
+            clearLine();
+            printf("  Invalid input. Enter 1 to 4.\n\n");
+        }
+    }
+
+    return 0;
+}
