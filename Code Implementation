@@ -143,7 +143,6 @@ void Replace (Position pos) {
 		R[pos.x][pos.y] = 1;
 
 	
-
 	if (!go && R[pos.x][pos.y]){		// blue captures red
 		R[pos.x][pos.y] = 0;
 		found = 1;
@@ -154,7 +153,6 @@ void Replace (Position pos) {
 
 	if (!go && !B[pos.x][pos.y])		// blue claims empty space
 		B[pos.x][pos.y] = 1;
-
 
 
 	if (found && !S[pos.x][pos.y]){
