@@ -383,17 +383,13 @@ int main() {
 
     return 0;
 }
------------------- END OF UPDATE NI GENE --------------- 
 
-
-
-
-
+/*
 Hi, explain ko na lang here. So yung main wag na galawin, malinis na siya basically interface yan. You can actually run it js comment out yung mga ibang funcs, yung naiwan na lang is:
 - Expand - done
-- Replace
+- Replace - done
 - Print Game Board
 - Play Game (Pseudo-main function) 
 
 Anw kayo na bahala with it, walang need icall sa funcs na yan so free-idea na fr fr. No worries bukas pa naman I'll check code ng mga 6. 
-
+*/
