@@ -120,15 +120,15 @@ void Expand(Position pos) {
 
     Remove(pos);
 
-    if (go) replace(u);
-    else replace(d);
+    if (go) Replace(u);
+    else Replace(d);
 
-    replace(k);
-    replace(r);
+    Replace(k);
+    Replace(r);
 
 }
 
-void replace (Position pos) {
+void Replace (Position pos) {
 	found = 0;
 	
 	if (go && B[pos.x][pos.y]){		// red captures blue
