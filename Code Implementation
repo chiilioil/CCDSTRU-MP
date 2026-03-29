@@ -73,6 +73,19 @@ void initialize () {
 /*  2. LOGIC                                                                  */
 /* ---------------------------------------------------------------------------*/
 
+void replace(Position pos); // function prototype
+
+int isInside(Position pos) {
+    int inside;
+
+    inside = 0;
+
+    if (pos.x >= 0 && pos.x < SIZE && pos.y >= 0 && pos.y < SIZE)
+        inside = 1;
+
+    return inside;   // helper to make sure the position is still in the board
+}
+
 int countPieces(int grid[SIZE][SIZE]) {  // count cells occupied for the first time or = 1
     int count = 0, i, j;
 
@@ -120,8 +133,11 @@ void Expand(Position pos) {
 
     Remove(pos);
 
-    if (go) Replace(u);
-    else Replace(d);
+    if (go) 
+        Replace(u);
+
+    else 
+        Replace(d);
 
     Replace(k);
     Replace(r);
@@ -129,6 +145,7 @@ void Expand(Position pos) {
 }
 
 void Replace (Position pos) {
+    if(isInside(pos)){
 	found = 0;
 	
 	if (go && B[pos.x][pos.y]){		// red captures blue
@@ -165,7 +182,7 @@ void Replace (Position pos) {
 		Expand(pos);
 	}
 }
-
+}
 void Update(Position pos) {
     good = 0;
 
@@ -319,7 +336,50 @@ void printCredits() {
 }
 
 void printGameBoard() {
-  - palagay here
+      int i, j;
+
+    system("cls"); 
+    printTitle();
+    printf("\n");
+    printf("  Turn       : ");
+
+    if (go)
+        printf(RED_COL "Red\n" RESET);
+    else
+        printf(BLUE_COL "Blue\n" RESET);
+
+    printf("  Phase      : ");
+
+    if (start)
+        printf("Placement\n");
+    else
+        printf("Expansion\n");
+
+    printf("  Move Count : %d / 20\n", val);
+    printf("  Red Pieces : %d\n", countPieces(R));
+    printf("  Blue Pieces: %d\n", countPieces(B));
+    printf("\n");
+
+    printf("        1   2   3\n");
+    printf("      +---+---+---+\n");
+
+    for (i = 0; i < SIZE; i++) {
+        printf("    %d |", i + 1);
+
+        for (j = 0; j < SIZE; j++) {
+            if (R[i][j])
+                printf(" " RED_COL "R" RESET " |");
+            else if (B[i][j])
+                printf(" " BLUE_COL "B" RESET " |");
+            else
+                printf("   |");
+        }
+
+        printf("\n");
+        printf("      +---+---+---+\n");
+    }
+
+    printf("\n");
 }
 
 
