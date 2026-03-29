@@ -269,152 +269,82 @@ void printCredits() {
     system("pause");
 }
 
+void printGameBoard() {
+  - palagay here
+}
+
+
+void playGame() { // game controller natin so overseeing function siya
+   int row, col, c, was_start;
+    struct Pos pos;
+
+    initialize();
+
+    while (!isOver()) {
+        printGameBoard();
+
+
+
+
+
+
+
+
+
+
+    printBoard();
+    GameOver();
+    system("pause");
+}
+
+
+
+
+
+
+
+
+
+
+int main() {
+    int nChoice;
+
+    do {
+        printMainMenu();
+        scanf("%d", &nChoice);
+
+        if (nChoice == 1) {
+            playGame();
+        }
+        else if (nChoice == 2) {
+            printHowToPlay();
+        }
+        else if (nChoice == 3) {
+            printCredits();
+        }
+        else if (nChoice != 4) {
+            printf("  " RED_COL "!" RESET " Invalid choice. Enter 1 to 4.\n");
+            system("pause");
+        }
+
+    } while (nChoice != 4);
+
+    system("cls");
+    printf("  Thanks for playing!\n\n");
+
+    return 0;
+}
 ------------------ END OF UPDATE NI GENE --------------- 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-void displayGrid(){
-  printf("%c %c %c", , ,);
-  printf("%c %c %c", , ,);
-  printf("%c %c %c", , ,);
-
-
-}
-
-void inputMove(){
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* commented out muna 
-/* ----------------------------------------------------------------------------*/
-
-Remove(){ // parameter = pos is an element of M ??
-
-  // go = red's turn, !go = blue's turn
-
-  if (go){
-    R = R - pos;
-  }
-
-  else{
-    B = B - pos;
-  }
-
-  S = S - pos;
-  T = T - pos;
-}
-
-Replace(){ // parameter = pos is an element of M ??
-  found = 0; // initialize found to false
-
-  if (go && B[pos] == 1){
-    B = B - B[pos];
-    found = 1;
-
-  }
-
-}
-
-Expand(){
-
-// u, d, k, r = up, down, left, right
-// positions in relation to the current position
-
-}
-
-GameOver(){
-
-
-}
-
-
-/* ----------------------------------------------------------------------------*/
-
-int main(){
-  
-  int good = 0;           //
-  int go = 1;             // player turn order, where 1 = red & 2 = blue
-  int start = 1;          // flags first move for both players ? -- effects change by move 2
-  int found = 0;          // flags if the player's move is valid ?
-  int val = 0;            // counter for # of turns (capped to 16) ?? or score
-  int over = 0;           // flags game over 
-
-
-  int M[SIZE][SIZE];      // initialize: playing field (grid)
-  int F[SIZE][SIZE];      // initialize: unclaimed portion of the grid
-  int R[SIZE][SIZE];      // initialize: red player
-  int B[SIZE][SIZE];      // initialize: blue player
-  int S[SIZE][SIZE];      // initialize: "visited" tiles ??
-  int T[SIZE][SIZE];      // initialize: "to expand"/"SASABOG" tiles ??
-
-  // initializes values for R, B, S, T
-  for (i = 0; i < SIZE; i++){
-    for (j = 0; j < SIZE; j++){
-        R[i][j] = 0;
-        B[i][j] = 0;
-        S[i][j] = 0;
-        T[i][j] = 0;
-    }
-  }
-
-  if ((F = 3) || (val >= 20) || (!start) || ())  
-
-
-
-  
-
-
-
-  return 0;
-}
-
-*/
+Hi, explain ko na lang here. So yung main wag na galawin, malinis na siya basically interface yan. You can actually run it js comment out yung mga ibang funcs, yung naiwan na lang is:
+- Expand
+- Replace
+- Print Game Board
+- Play Game (Pseudo-main function) 
+
+Anw kayo na bahala with it, walang need icall sa funcs na yan so free-idea na fr fr. No worries bukas pa naman I'll check code ng mga 6. 
 
