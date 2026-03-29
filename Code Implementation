@@ -26,10 +26,10 @@ Names:
 #define CYAN        "\033[36m"
 #define GREEN       "\033[32m"
 
-struct Positon {
+typedef struct Position {
   int a; // row
   int b; // column
-}
+} Position;
 
 /* ------------ SETS -----------*/ 
   int R[SIZE][SIZE];   // Red                              
@@ -101,7 +101,7 @@ int isOver() { // checks game-ending conditions
     return countFree() == 3 || val >= 20 || wiped; // less than 20 moves 
 }
 
-void remove(struct Position pos) { // Removes the pieces 
+void remove(Position pos) { // Removes the pieces 
     if (go) R[pos.a][pos.b] = 0;
     else    B[pos.a][pos.b] = 0;
 
@@ -109,15 +109,30 @@ void remove(struct Position pos) { // Removes the pieces
     T[pos.a][pos.b] = 0;
 }
 
-void expand(struct Pos pos) {
-    - palagay here - 
+void expand(Position pos) {
+    int a = pos.a;
+    int b = pos.b;
+
+    Position u = {a - 1, b};
+    Position d = {a + 1, b};
+    Position k = {a, b - 1};
+    Position r = {a, b + 1};
+
+    remove(pos);
+
+    if (go) replace(u);
+    else replace(d);
+
+    replace(k);
+    replace(r);
+
 }
 
-void replace (struct Pos pos) {
+void replace (Position pos) {
   - palagay here -
 }
 
-void Update(struct Pos pos) {
+void Update(Position pos) {
     good = 0;
 
     if (!S[pos.a][pos.b]) { // Seen for the first time or occupied for the first time
@@ -127,11 +142,11 @@ void Update(struct Pos pos) {
 
     if (!good && S[pos.a][pos.b] && !T[pos.a][pos.b]) { // Already seen, this will trigger expand
         T[pos.a][pos.b] = 1;
-        Expand(pos);
+        expand(pos);
     }
 }
 
-void NextPlayerMove(struct Pos pos) {
+void NextPlayerMove(Position pos) {
 
     if (!isOver() && start) { // Put a piece on an empty cell
         if (go) R[pos.a][pos.b] = 1;
@@ -276,7 +291,7 @@ void printGameBoard() {
 
 void playGame() { // game controller natin so overseeing function siya
    int row, col, c, was_start;
-    struct Pos pos;
+    Position pos;
 
     initialize();
 
@@ -341,7 +356,7 @@ int main() {
 
 
 Hi, explain ko na lang here. So yung main wag na galawin, malinis na siya basically interface yan. You can actually run it js comment out yung mga ibang funcs, yung naiwan na lang is:
-- Expand
+- Expand - done
 - Replace
 - Print Game Board
 - Play Game (Pseudo-main function) 
