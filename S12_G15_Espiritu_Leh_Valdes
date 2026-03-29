@@ -13,7 +13,7 @@ Names:
 #include <stdio.h>
 #include <stdlib.h>
 
-#define SIZE 3
+#define SIZE 3		// 3x3 board
 
 #define RESET       "\033[0m"
 #define BOLD        "\033[1m"
@@ -31,15 +31,17 @@ typedef struct Position {
 } Position;
 
 typedef struct {
-    int R[SIZE][SIZE];
-    int B[SIZE][SIZE];
-    int S[SIZE][SIZE];
-    int T[SIZE][SIZE];
-    int good;
-    int go;
-    int start;
-    int found;
-    int val;
+    int R[SIZE][SIZE];		// cells occupied by red
+    int B[SIZE][SIZE];		// cells occupied by blue
+    int S[SIZE][SIZE];		// cells visited during expansion
+    int T[SIZE][SIZE];		// cells that have already chain expanded
+    
+	/* FLAG VARIABLES */
+	int good;				// validity of current move
+    int go;					// 1 = red's turn; 0 = blue's turn
+    int start;				// (1) placement & (0) expansion phases
+    int found;				// expansion into occupied cell
+    int val;				// move counter
 } GameState;
 
 /* -------------- function prototypes ----------------*/
@@ -83,11 +85,11 @@ void initialize(GameState *game) {
         }
     }
 
-    game->good = 0;
-    game->go = 1;
-    game->start = 1;
-    game->found = 0;
-    game->val = 0;
+    game->good = 0;		// no valid move yet
+    game->go = 1;		// red moves first
+    game->start = 1;	// placement phase first
+    game->found = 0;	// nothing found
+    game->val = 0;		// no moves played
 }
 
 /* ---------------------------------------------------------------------------*/
@@ -103,6 +105,7 @@ void clearLine(void) {
     }
 }
 
+/* checks for valid input -- if pos is within the 3x3 grid */
 int isInside(Position pos) {
     int inside;
 
@@ -115,6 +118,7 @@ int isInside(Position pos) {
     return inside;
 }
 
+/* counts how many cells are occupied in the grid -- for game end condition*/
 int countPieces(int grid[SIZE][SIZE]) {
     int count, i, j;
 
@@ -131,6 +135,7 @@ int countPieces(int grid[SIZE][SIZE]) {
     return count;
 }
 
+/* counts how many cells are unoccupied */
 int countFree(GameState *game) {
     int count, i, j;
 
@@ -147,17 +152,20 @@ int countFree(GameState *game) {
     return count;
 }
 
+/* checks for game end conditions */
 int isOver(GameState *game) {
     int r, b, wiped, over;
 
-    r = countPieces(game->R);
-    b = countPieces(game->B);
+    r = countPieces(game->R);	// counts active red pieces
+    b = countPieces(game->B);	// counts active blue pieces
 
+	/* checks if a player has been completely wiped out */
     wiped = 0;
     if (!game->start && ((r > 0 && b == 0) || (r == 0 && b > 0))) {
         wiped = 1;
     }
 
+	/* checks for if: board is nearly full, move limit is reacehd, or if a player has been wiped out */
     over = 0;
     if (countFree(game) == 3 || game->val >= 20 || wiped) {
         over = 1;
@@ -166,39 +174,48 @@ int isOver(GameState *game) {
     return over;
 }
 
+/* removes the current player's piece at pos and clears the visit/chain flags */
 void Remove(GameState *game, Position pos) {
-    if (game->go) {
+    if (game->go) {						// red's turn
         game->R[pos.x][pos.y] = 0;
     }
-    else {
+    else {								// blue's turn
         game->B[pos.x][pos.y] = 0;
     }
 
+	/* clears visited and chain-expanded flags */
     game->S[pos.x][pos.y] = 0;
     game->T[pos.x][pos.y] = 0;
 }
 
+/* removes piece at current pos and "expands" it into neighboring cells -- blue and red have different behaviours */
 void Expand(GameState *game, Position pos) {
     int a, b;
     Position u, d, k, r;
 
+	// current coordinates
     a = pos.x;
     b = pos.y;
 
+	// directly above
     u.x = a - 1;
     u.y = b;
 
+	// directly below
     d.x = a + 1;
     d.y = b;
 
+	// directly left
     k.x = a;
     k.y = b - 1;
 
+	// directly right
     r.x = a;
     r.y = b + 1;
 
-    Remove(game, pos);
+    Remove(game, pos); // removes current pos
 
+	// red spreads upwards, blue spreads downwards
     if (game->go) {
         Replace(game, u);
     }
@@ -206,45 +223,57 @@ void Expand(GameState *game, Position pos) {
         Replace(game, d);
     }
 
+	// both colours expand left and right
     Replace(game, k);
     Replace(game, r);
 }
 
+/* claims the cell/s occupied by the opponent */
 void Replace(GameState *game, Position pos) {
-    if (isInside(pos)) {
-        game->found = 0;
+    if (isInside(pos)) {		// outbound check
+        game->found = 0;		// reset found flag
 
+		/* red's expansion */
+		/* capturing a blue piece */
         if (game->go && game->B[pos.x][pos.y]) {
             game->B[pos.x][pos.y] = 0;
             game->found = 1;
         }
 
+		/* tries to capture own piece */
         if (game->go && game->R[pos.x][pos.y]) {
             game->found = 1;
         }
 
+		/* claims empty cell */
         if (game->go && !game->R[pos.x][pos.y]) {
             game->R[pos.x][pos.y] = 1;
         }
 
+		/* blue's expansion */
+		/* capturing a red piece */
         if (!game->go && game->R[pos.x][pos.y]) {
             game->R[pos.x][pos.y] = 0;
             game->found = 1;
         }
 
+		/* tries to capture own piece */
         if (!game->go && game->B[pos.x][pos.y]) {
             game->found = 1;
         }
 
+		/* claims empty cell */
         if (!game->go && !game->B[pos.x][pos.y]) {
             game->B[pos.x][pos.y] = 1;
         }
 
+		/* marks a cell as "visited" when it is first hit by expansion */
         if (game->found && !game->S[pos.x][pos.y]) {
             game->S[pos.x][pos.y] = 1;
             game->found = 0;
         }
 
+		/*	triggers a chain reaction when the cell is hit a second time */
         if (game->found && game->S[pos.x][pos.y] && !game->T[pos.x][pos.y]) {
             game->T[pos.x][pos.y] = 1;
             Expand(game, pos);
@@ -252,20 +281,24 @@ void Replace(GameState *game, Position pos) {
     }
 }
 
+/* expansion move on occupied tile*/
 void Update(GameState *game, Position pos) {
     game->good = 0;
 
+	/* marks unvisited cells and flags it as visited */
     if (!game->S[pos.x][pos.y]) {
         game->S[pos.x][pos.y] = 1;
         game->good = !game->good;
     }
 
+	/* trigger expansion if the cell has already been visited */
     if (!game->good && game->S[pos.x][pos.y] && !game->T[pos.x][pos.y]) {
         game->T[pos.x][pos.y] = 1;
         Expand(game, pos);
     }
 }
 
+/* turn order and validity checks */
 void NextPlayerMove(GameState *game, Position pos) {
     if (!isOver(game) && game->start) {
         if (game->go) {
@@ -300,6 +333,7 @@ void NextPlayerMove(GameState *game, Position pos) {
     }
 }
 
+/* prints end of game results */
 void GameOver(GameState *game) {
     int r, b;
 
