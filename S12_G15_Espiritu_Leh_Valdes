@@ -7,9 +7,7 @@ Group:   15
 Names:
   Gene Clement Espiritu
   Elysha Audrey Leh
-  Jeno Angelo Valdes
-
-  add github link here?
+  Jelo Angelo Valdes
 */
 
 #include <stdio.h>
@@ -413,7 +411,7 @@ void printCredits(void) {
     printf(DIM "  -------\n" RESET);
     printf(CYAN "  Gene Clement Espiritu\n" RESET);
     printf(CYAN "  Elysha Audrey Leh\n" RESET);
-    printf(CYAN "  Jeno Angelo Valdes\n" RESET);
+    printf(CYAN "  Jelo Angelo Valdes\n" RESET);
     printf("\n");
     printf("  Group    :  15\n");
 	printf("  Section  :  S12\n");
