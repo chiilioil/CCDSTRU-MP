@@ -16,6 +16,10 @@ Names:
 #include <stdlib.h>
 #define SIZE 3
 
+#define RESET       "\033[0m"
+#define BOLD        "\033[1m"
+#define DIM         "\033[2m"
+
 #define RED_COL     "\033[31m"
 #define BLUE_COL    "\033[34m"
 #define YELLOW      "\033[33m"
@@ -153,7 +157,7 @@ void NextPlayerMove(struct Pos pos) {
     }
 }
 
-void GameOver(void) {
+void GameOver() {
     int r = countPieces(R);
     int b = countPieces(B);
 
@@ -190,7 +194,7 @@ void GameOver(void) {
 /*  3. Display                                                                  */
 /* ---------------------------------------------------------------------------*/
 
-void printTitle(void) {
+void printTitle() {
     printf("  ==========================================\n");
     printf(BOLD "        CHAIN REACTION   --   " RESET
            RED_COL BOLD "Red" RESET " vs " BLUE_COL BOLD "Blue" RESET "\n");
@@ -198,7 +202,7 @@ void printTitle(void) {
     printf(YELLOW "  ==========================================\n" RESET);
 }
 
-void printMainMenu(void) {
+void printMainMenu() {
     system("cls");
     printTitle();
     printf("\n");
@@ -210,7 +214,7 @@ void printMainMenu(void) {
     printf("  Enter choice: ");
 }
 
-void printHowToPlay(void) {
+void printHowToPlay() {
     system("cls");
     printTitle();
     printf("\n");
@@ -247,7 +251,23 @@ void printHowToPlay(void) {
     system("pause");
 }
 
-
+void printCredits() {
+    system("cls");
+    printTitle();
+    printf("\n");
+    printf(BOLD "  CREDITS\n" RESET);
+    printf(DIM "  -------\n" RESET);
+    printf(CYAN "  Gene Clement Espiritu\n" RESET);
+    printf(CYAN "  Elysha Audrey Leh\n" RESET);
+    printf(CYAN "  Jeno Angelo Valdes\n" RESET);
+    printf("\n");
+    printf( "  Section  :  "  "S12\n");
+    printf( "  Course   :  "  "CCDSTRU\n");
+    printf( "  Term     :  "  "Term 2, AY 2025-2026\n");
+    printf("\n");
+    printf( "  ------------------------------------------\n" );
+    system("pause");
+}
 
 ------------------ END OF UPDATE NI GENE --------------- 
 
