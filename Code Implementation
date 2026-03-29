@@ -16,6 +16,12 @@ Names:
 #include <stdlib.h>
 #define SIZE 3
 
+#define RED_COL     "\033[31m"
+#define BLUE_COL    "\033[34m"
+#define YELLOW      "\033[33m"
+#define CYAN        "\033[36m"
+#define GREEN       "\033[32m"
+
 struct Positon {
   int a; // row
   int b; // column
@@ -60,7 +66,7 @@ void initialize () {
 }
 
 /* ---------------------------------------------------------------------------*/
-/*  1. LOGIC                                                                  */
+/*  2. LOGIC                                                                  */
 /* ---------------------------------------------------------------------------*/
 
 int countPieces(int grid[SIZE][SIZE]) {  // count cells occupied for the first time or = 1
@@ -91,13 +97,158 @@ int isOver() { // checks game-ending conditions
     return countFree() == 3 || val >= 20 || wiped; // less than 20 moves 
 }
 
-void Remove(struct Position pos) { // Removes the pieces 
+void remove(struct Position pos) { // Removes the pieces 
     if (go) R[pos.a][pos.b] = 0;
     else    B[pos.a][pos.b] = 0;
 
     S[pos.a][pos.b] = 0;
     T[pos.a][pos.b] = 0;
 }
+
+void expand(struct Pos pos) {
+    - palagay here - 
+}
+
+void replace (struct Pos pos) {
+  - palagay here -
+}
+
+void Update(struct Pos pos) {
+    good = 0;
+
+    if (!S[pos.a][pos.b]) { // Seen for the first time or occupied for the first time
+        S[pos.a][pos.b] = 1;
+        good = 1;
+    }
+
+    if (!good && S[pos.a][pos.b] && !T[pos.a][pos.b]) { // Already seen, this will trigger expand
+        T[pos.a][pos.b] = 1;
+        Expand(pos);
+    }
+}
+
+void NextPlayerMove(struct Pos pos) {
+
+    if (!isOver() && start) { // Put a piece on an empty cell
+        if (go) R[pos.a][pos.b] = 1;
+        else    B[pos.a][pos.b] = 1;
+        S[pos.a][pos.b] = 1;
+        good = 1;
+    }
+
+    if (!isOver() && !start) { // Expand a piece
+        if ((go && R[pos.a][pos.b]) || (!go && B[pos.a][pos.b])) {
+            Update(pos);
+            good = 1;
+        }
+    }
+
+    if (start && countPieces(R) == 1 && countPieces(B) == 1) // Both have placed a piece
+        start = 0;
+
+    if (!isOver() && good) { // End of turn 
+        good = 0;
+        go   = !go;
+        val++;
+    }
+}
+
+void GameOver(void) {
+    int r = countPieces(R);
+    int b = countPieces(B);
+
+    printf("\n");
+    printf(DIM "  -------------------------------------------\n" RESET);
+
+    if (r > b) {
+        printf(RED_COL BOLD "      RED  WINS!" RESET
+               "   Red: %d piece(s)  Blue: %d piece(s)\n", r, b);
+    } else if (b > r) {
+        printf(BLUE_COL BOLD "      BLUE WINS!" RESET
+               "   Blue: %d piece(s)  Red: %d piece(s)\n", b, r);
+    } else {
+        printf(YELLOW BOLD "         DRAW!" RESET
+               "   Both players have %d piece(s)\n", r);
+    }
+
+    printf(DIM "  -------------------------------------------\n" RESET);
+    printf("\n");
+    
+    if (countFree() == 3)
+        printf("  -> Board is nearly full (only 3 empty cells left).\n");
+    else if (val >= 20)
+        printf("  -> 16 moves have been played.\n");
+    else if (countPieces(B) == 0)
+        printf("  -> " BLUE_COL "Blue" RESET " lost all their pieces!\n");
+    else if (countPieces(R) == 0)
+        printf("  -> " RED_COL "Red" RESET " lost all their pieces!\n");
+
+    printf("\n");
+}
+
+/* ---------------------------------------------------------------------------*/
+/*  3. Display                                                                  */
+/* ---------------------------------------------------------------------------*/
+
+void printTitle(void) {
+    printf("  ==========================================\n");
+    printf(BOLD "        CHAIN REACTION   --   " RESET
+           RED_COL BOLD "Red" RESET " vs " BLUE_COL BOLD "Blue" RESET "\n");
+    printf(DIM "       CCDSTRU MP  |  AY 2025-2026  |  S12 \n" RESET);
+    printf(YELLOW "  ==========================================\n" RESET);
+}
+
+void printMainMenu(void) {
+    system("cls");
+    printTitle();
+    printf("\n");
+    printf(CYAN "  [1]" RESET " Start Game\n");
+    printf(CYAN "  [2]" RESET " How to Play\n");
+    printf(CYAN "  [3]" RESET " Credits\n");
+    printf(CYAN "  [4]" RESET " Exit\n");
+    printf("\n");
+    printf("  Enter choice: ");
+}
+
+void printHowToPlay(void) {
+    system("cls");
+    printTitle();
+    printf("\n");
+    printf(BOLD "  HOW TO PLAY\n" RESET);
+    printf(DIM "  -----------\n" RESET);
+    printf("  2-player strategy game on a 3x3 grid.\n");
+    printf("  The player with the most pieces when the game ends " BOLD "WINS.\n" RESET);
+    printf("\n");
+    printf(YELLOW "  PHASE 1 - Placement\n" RESET);
+    printf("    Each player places ONE piece on any empty cell.\n");
+    printf("    " RED_COL "Red" RESET " places first, then " BLUE_COL "Blue" RESET ".\n");
+    printf("\n");
+    printf(YELLOW "  PHASE 2 - Movement\n" RESET);
+    printf("    On your turn, pick one of YOUR OWN pieces to EXPAND.\n");
+    printf("    The piece disappears and spreads into neighboring cells:\n");
+    printf("      " RED_COL "Red" RESET "  spreads:  UP, LEFT, RIGHT\n");
+    printf("      " BLUE_COL "Blue" RESET " spreads:  DOWN, LEFT, RIGHT\n");
+    printf("\n");
+    printf("    What happens when spreading into a cell:\n");
+    printf("      Empty cell      ->  you claim it\n");
+    printf("      Enemy piece     ->  you capture it (it disappears)\n");
+    printf("      Your own piece  ->  may trigger a " YELLOW BOLD "CHAIN REACTION!\n" RESET);
+    printf("\n");
+    printf(YELLOW "  GAME ENDS when any of these happen:\n" RESET);
+    printf("    - Only 3 cells are empty\n");
+    printf("    - One player loses all their pieces\n");
+    printf("    - 16 moves have been played\n");
+    printf("\n");
+    printf(YELLOW "  ENTERING A MOVE:\n" RESET);
+    printf("    Type the ROW number and COLUMN number separated by a space.\n");
+    printf("    Example:  " CYAN "2 3" RESET "   =  row 2, column 3\n");
+    printf("\n");
+    printf(DIM "  ------------------------------------------\n" RESET);
+    system("pause");
+}
+
+
+
 ------------------ END OF UPDATE NI GENE --------------- 
 
 
