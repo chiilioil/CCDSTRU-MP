@@ -27,15 +27,15 @@ Names:
 #define GREEN       "\033[32m"
 
 typedef struct Position {
-  int a; // row
-  int b; // column
+  int x; // row
+  int y; // column
 } Position;
 
 /* ------------ SETS -----------*/ 
   int R[SIZE][SIZE];   // Red                              
   int B[SIZE][SIZE];   // Blue                           
   int S[SIZE][SIZE];   // Seen    -- visited during a spread        
-  int T[SIZE][SIZE];   // Trigger -- already chain-expanded    
+  int T[SIZE][SIZE];   // Trigger -- already chain-Expanded    
 
 /* ----------- FLAGS ---------*/
   int good;
@@ -102,16 +102,16 @@ int isOver() { // checks game-ending conditions
 }
 
 void remove(Position pos) { // Removes the pieces 
-    if (go) R[pos.a][pos.b] = 0;
-    else    B[pos.a][pos.b] = 0;
+    if (go) R[pos.x][pos.y] = 0;
+    else    B[pos.x][pos.y] = 0;
 
-    S[pos.a][pos.b] = 0;
-    T[pos.a][pos.b] = 0;
+    S[pos.x][pos.y] = 0;
+    T[pos.x][pos.y] = 0;
 }
 
-void expand(Position pos) {
-    int a = pos.a;
-    int b = pos.b;
+void Expand(Position pos) {
+    int a = pos.x;
+    int b = pos.y;
 
     Position u = {a - 1, b};
     Position d = {a + 1, b};
@@ -131,68 +131,68 @@ void expand(Position pos) {
 void replace (Position pos) {
 	found = 0;
 	
-	if (go && B[pos.a][pos.b]){		// red captures blue
-		B[pos.a][pos.b] = 0;
+	if (go && B[pos.x][pos.y]){		// red captures blue
+		B[pos.x][pos.y] = 0;
 		found = 1;
 	}
 
-	if (go && R[pos.a][pos.b])		// red spreads into itself
+	if (go && R[pos.x][pos.y])		// red spreads into itself
 		found = 1;
 
-	if (go && !R[pos.a][pos.b])		// red claims empty space
-		R[pos.a][pos.b] = 1;
+	if (go && !R[pos.x][pos.y])		// red claims empty space
+		R[pos.x][pos.y] = 1;
 
 	
 
-	if (!go && R[pos.a][pos.b]){		// blue captures red
-		R[pos.a][pos.b] = 0;
+	if (!go && R[pos.x][pos.y]){		// blue captures red
+		R[pos.x][pos.y] = 0;
 		found = 1;
 	}
 
-	if (!go && B[pos.a][pos.b])		// blue captures itself
+	if (!go && B[pos.x][pos.y])		// blue captures itself
 		found = 1;
 
-	if (!go && !B[pos.a][pos.b])		// blue claims empty space
-		B[pos.a][pos.b] = 1;
+	if (!go && !B[pos.x][pos.y])		// blue claims empty space
+		B[pos.x][pos.y] = 1;
 
 
 
-	if (found && !S[pos.a][pos.b]){
-		S[pos.a][pos.b] = 1;
+	if (found && !S[pos.x][pos.y]){
+		S[pos.x][pos.y] = 1;
 		found = 0;
 	}
 
-	if (found && S[pos.a][pos.b] && !T[pos.a][pos.b]){
-		T[pos.a][pos.b] = 1;
-		expand(pos);
+	if (found && S[pos.x][pos.y] && !T[pos.x][pos.y]){
+		T[pos.x][pos.y] = 1;
+		Expand(pos);
 	}
 }
 
 void Update(Position pos) {
     good = 0;
 
-    if (!S[pos.a][pos.b]) { // Seen for the first time or occupied for the first time
-        S[pos.a][pos.b] = 1;
+    if (!S[pos.x][pos.y]) { // Seen for the first time or occupied for the first time
+        S[pos.x][pos.y] = 1;
         good = 1;
     }
 
-    if (!good && S[pos.a][pos.b] && !T[pos.a][pos.b]) { // Already seen, this will trigger expand
-        T[pos.a][pos.b] = 1;
-        expand(pos);
+    if (!good && S[pos.x][pos.y] && !T[pos.x][pos.y]) { // Already seen, this will trigger Expand
+        T[pos.x][pos.y] = 1;
+        Expand(pos);
     }
 }
 
 void NextPlayerMove(Position pos) {
 
     if (!isOver() && start) { // Put a piece on an empty cell
-        if (go) R[pos.a][pos.b] = 1;
-        else    B[pos.a][pos.b] = 1;
-        S[pos.a][pos.b] = 1;
+        if (go) R[pos.x][pos.y] = 1;
+        else    B[pos.x][pos.y] = 1;
+        S[pos.x][pos.y] = 1;
         good = 1;
     }
 
     if (!isOver() && !start) { // Expand a piece
-        if ((go && R[pos.a][pos.b]) || (!go && B[pos.a][pos.b])) {
+        if ((go && R[pos.x][pos.y]) || (!go && B[pos.x][pos.y])) {
             Update(pos);
             good = 1;
         }
@@ -279,7 +279,7 @@ void printHowToPlay() {
     printf("    " RED_COL "Red" RESET " places first, then " BLUE_COL "Blue" RESET ".\n");
     printf("\n");
     printf(YELLOW "  PHASE 2 - Movement\n" RESET);
-    printf("    On your turn, pick one of YOUR OWN pieces to EXPAND.\n");
+    printf("    On your turn, pick one of YOUR OWN pieces to Expand.\n");
     printf("    The piece disappears and spreads into neighboring cells:\n");
     printf("      " RED_COL "Red" RESET "  spreads:  UP, LEFT, RIGHT\n");
     printf("      " BLUE_COL "Blue" RESET " spreads:  DOWN, LEFT, RIGHT\n");
