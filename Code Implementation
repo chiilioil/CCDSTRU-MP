@@ -101,7 +101,7 @@ int isOver() { // checks game-ending conditions
     return countFree() == 3 || val >= 20 || wiped; // less than 20 moves 
 }
 
-void remove(Position pos) { // Removes the pieces 
+void Remove(Position pos) { // Removes the pieces 
     if (go) R[pos.x][pos.y] = 0;
     else    B[pos.x][pos.y] = 0;
 
@@ -118,7 +118,7 @@ void Expand(Position pos) {
     Position k = {a, b - 1};
     Position r = {a, b + 1};
 
-    remove(pos);
+    Remove(pos);
 
     if (go) replace(u);
     else replace(d);
